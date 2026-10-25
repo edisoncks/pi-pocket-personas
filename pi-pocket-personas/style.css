@@ -1,0 +1,266 @@
+/* Personas: the manager page and the picker sheet. Tokens follow the theme; a theme's rules win over these. */
+
+.x-personas {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.x-personas-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.x-personas-head p {
+    margin: 4px 0 0;
+    max-width: 60ch;
+}
+
+.x-personas-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.x-personas-note {
+    color: var(--ok);
+    margin: 0 0 12px;
+}
+
+.x-personas-grid {
+    display: grid;
+    grid-template-columns: minmax(210px, 300px) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+}
+
+.x-personas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.x-personas-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 11px;
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.x-personas-row:hover {
+    background: var(--card);
+}
+
+.x-personas-row.current {
+    border-color: var(--line);
+    background: var(--card);
+}
+
+.x-personas-row-name {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.x-personas-row-preview {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.x-personas-pane {
+    min-width: 0;
+}
+
+.x-personas-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.x-personas-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.x-personas-input,
+.x-personas-text {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+}
+
+.x-personas-text {
+    min-height: 240px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.x-personas-input:focus,
+.x-personas-text:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+}
+
+.x-personas-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.x-personas-actions .small {
+    color: var(--muted);
+}
+
+.x-personas-picker {
+    display: flex;
+    flex-direction: column;
+}
+
+.x-personas-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--card);
+    color: var(--text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.x-personas-option + .x-personas-option {
+    margin-top: 6px;
+}
+
+.x-personas-option:hover {
+    border-color: var(--accent-line);
+}
+
+.x-personas-option.chosen {
+    border-color: var(--accent);
+}
+
+.x-personas-option:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+@media (max-width: 699px) {
+    .x-personas {
+        padding: 12px;
+    }
+
+    .x-personas-head {
+        align-items: stretch;
+    }
+
+    .x-personas-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .x-personas-text {
+        min-height: 200px;
+    }
+}
+
+.x-personas-vars {
+    margin: 0;
+}
+
+.x-personas-vars code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+}
+
+.x-personas-warn {
+    margin: 0;
+    color: var(--warn);
+}
+
+.x-personas-default {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--card);
+}
+
+.x-personas-default-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.x-personas-default-title {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.x-personas-default p {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.x-personas-select {
+    max-width: 240px;
+    padding: 6px 9px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+}
+
+.x-personas-select:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+}
+
+.x-personas-inherited {
+    margin: 0 0 10px;
+}
+
+@media (max-width: 699px) {
+    .x-personas-default-label {
+        flex-wrap: wrap;
+    }
+
+    .x-personas-select {
+        max-width: 100%;
+    }
+}

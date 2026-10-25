@@ -1,0 +1,20 @@
+{
+    "name": "pi-pocket-personas",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Saved personas for Pi Pocket: a system-prompt section per session, a manager page, a picker, and a default for new sessions.",
+    "type": "module",
+    "scripts": {
+        "test": "node --test pi-pocket-personas.test.ts pi-pocket-personas-ui.test.ts",
+        "check": "tsc --noEmit --target ES2024 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --allowImportingTsExtensions --erasableSyntaxOnly --verbatimModuleSyntax --types node pi-pocket-personas.ts"
+    },
+    "devDependencies": {
+        "@earendil-works/chord": "1.4.0",
+        "@earendil-works/pi-ai": "1.4.0",
+        "@earendil-works/pi-coding-agent": "1.4.0",
+        "@earendil-works/pi-durable": "1.4.0",
+        "@types/node": "^26.6.5",
+        "preact": "^11.0.2",
+        "typescript": "^6.0.3"
+    }
+}
