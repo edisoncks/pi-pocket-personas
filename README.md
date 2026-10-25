@@ -5,22 +5,17 @@ prompt for that session, from the next model request on. Each session can have a
 
 ## Install
 
-### From the gallery in this repository
+### From the main gallery
 
-This repository is also its own gallery index (`index.json`). In Pi Pocket:
-
-1. **Menu → Extensions → Discover**.
-2. At the bottom, set the index to `edisoncks/pi-pocket-personas`.
-3. Install **Pi Pocket Personas**.
-
-The gallery downloads the files from this repository at the pinned commit, checks every SHA-256, and installs the
-module **off**. Read its source, then turn it on in **Menu → Extensions**. The browser module loads at the tab's next
-reload.
+The entry is prepared for the main gallery index, `TannerMidd/pi-pocket-extensions`, as `entries/personas.json`. After
+that pull request is merged, install **Pi Pocket Personas** from **Menu → Extensions → Discover**. The gallery downloads
+the files from this repository at the pinned commit, checks every SHA-256, and installs the module **off**. Read its
+source, then turn it on in **Menu → Extensions**. The browser module loads at the tab's next reload.
 
 The gallery keeps the installed copy and its provenance in `personas.gallery.json`; updates and uninstall go through
 the gallery.
 
-### With `cp` for development
+### Manual install for development
 
 Copy the module and its browser folder into Pi Pocket's drop-in folder:
 
@@ -30,13 +25,6 @@ cp -r personas ~/.pi-pocket/extensions/
 ```
 
 Then turn it on in **Menu → Extensions → Pi Pocket Personas**.
-
-### In the main gallery
-
-The entry can also be submitted to the default gallery index, so anyone can install it without changing the index:
-open a pull request with `entries/personas.json` to
-[TannerMidd/pi-pocket-extensions](https://github.com/TannerMidd/pi-pocket-extensions). Its CONTRIBUTING tells the
-rest. **Share…** in Pi Pocket's Installed tab writes the entry draft from the installed module.
 
 The default for new sessions needs Pi Pocket 0.20.0 or newer (the session list); this version was tested on 0.22.0.
 
@@ -61,7 +49,6 @@ personas.ts                    the module: the prompt section, the routes, and /
 personas/
     index.js                   the page, the picker sheet, the rail button, and the status item
     style.css                  the page's and picker's look
-index.json                     this repository as a gallery index
 pi-pocket-personas.test.ts     routes, the section, the command, a restart, the default, migration, off/on
 pi-pocket-personas-ui.test.ts  the same flow in a real Chromium, desktop and phone
 _pocket.d.ts                   a copy of Pi Pocket 0.22.0's public types, for `npm run check`
