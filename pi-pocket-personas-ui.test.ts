@@ -100,7 +100,7 @@ before(async () => {
         join(import.meta.dirname, "pi-pocket-personas.ts"),
         join(dropIns, "pi-pocket-personas.ts"),
     );
-    cpSync(join(import.meta.dirname, "pi-pocket-personas"), join(dropIns, "pi-pocket-personas"), {
+    cpSync(join(import.meta.dirname, "personas-ui"), join(dropIns, "personas-ui"), {
         recursive: true,
     });
 

@@ -9,7 +9,7 @@ Copy the module and its browser folder into Pi Pocket's drop-in folder:
 
 ```sh
 cp pi-pocket-personas.ts ~/.pi-pocket/extensions/
-cp -r pi-pocket-personas ~/.pi-pocket/extensions/
+cp -r personas-ui ~/.pi-pocket/extensions/
 ```
 
 Then turn it on in **Menu → Extensions → Pi Pocket Personas**. A drop-in starts off. The browser module loads in the
@@ -34,7 +34,7 @@ extension, so most sessions need nothing.
 
 ```
 pi-pocket-personas.ts          the module: the prompt section, the routes, and /persona-use
-pi-pocket-personas/
+personas-ui/
     index.js                   the page, the picker sheet, the rail button, and the status item
     style.css                  the page's and picker's look
 pi-pocket-personas.test.ts     routes, the section, the command, a restart, the default, migration, off/on
@@ -115,7 +115,7 @@ button, the picker, or the status item.
 To let guests who can steer a session choose a persona, widen all three:
 
 ```ts
-web.client("pi-pocket-personas", { access: "view" }); // or "steer"
+web.client("personas-ui", { access: "view" }); // or "steer"
 web.route("GET", "state/:session", handler, { access: "view" });
 web.route("PUT", "active/:session", handler, { access: "steer" });
 ```

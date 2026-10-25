@@ -115,7 +115,7 @@ async function call(path: string, options: { method?: string; body?: unknown } =
 before(async () => {
     mkdirSync(dropIns, { recursive: true });
     copyFileSync(join(import.meta.dirname, "pi-pocket-personas.ts"), join(dropIns, moduleFile));
-    cpSync(join(import.meta.dirname, "pi-pocket-personas"), join(dropIns, "pi-pocket-personas"), {
+    cpSync(join(import.meta.dirname, "personas-ui"), join(dropIns, "personas-ui"), {
         recursive: true,
     });
 
@@ -326,13 +326,9 @@ test("a version 1 catalog migrates, and its sessions keep their persona", async 
         join(import.meta.dirname, "pi-pocket-personas.ts"),
         join(migrationDrop, "pi-pocket-personas.ts"),
     );
-    cpSync(
-        join(import.meta.dirname, "pi-pocket-personas"),
-        join(migrationDrop, "pi-pocket-personas"),
-        {
-            recursive: true,
-        },
-    );
+    cpSync(join(import.meta.dirname, "personas-ui"), join(migrationDrop, "personas-ui"), {
+        recursive: true,
+    });
 
     const migrationApp = await openApp(scriptedModel(), migrationDir);
 
