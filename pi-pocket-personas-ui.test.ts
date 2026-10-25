@@ -163,6 +163,12 @@ test(
         await until(() => has(".x-personas"), "the personas page");
         await settled();
         await page.click({ label: "New persona" });
+
+        const hint = await inPage<string>(
+            `return JSON.stringify(document.querySelector(".x-personas-vars code")?.textContent ?? "")`,
+        );
+
+        assert.equal(hint, "\\{{");
         await page.type({ selector: ".x-personas-input" }, "Terse reviewer");
         await page.type(
             { selector: ".x-personas-text" },
@@ -311,4 +317,79 @@ test("the manager and message box fit a phone", real, async () => {
     assert.ok(box.scroll <= box.client + 1, `the page overflows: ${JSON.stringify(box)}`);
 
     await page.setViewport(DESKTOP);
+});
+
+test("the manager reports a failed catalog and locks the editor while saving", real, async () => {
+    await page.navigate(`${base}/s/${String(session)}`);
+    await until(() => has('.sidebar .rail-ext[title="Personas"]'), "the Personas rail button");
+
+    // Make the catalog route fail, then open the manager.
+    await page.evaluate(`(() => {
+        window.__personasFetch = window.fetch;
+        window.fetch = (url, options) =>
+            String(url).includes("/api/x/personas/catalog")
+                ? Promise.resolve(new Response(JSON.stringify({ error: "Catalog unavailable" }), {
+                      status: 500,
+                      headers: { "content-type": "application/json" },
+                  }))
+                : window.__personasFetch(url, options);
+        return JSON.stringify(null);
+    })()`);
+    await page.click({ selector: '.sidebar .rail-ext[title="Personas"]' });
+    await until(() => has(".x-personas"), "the personas page");
+    await page.waitFor({ text: "Could not read the catalog." });
+    await settled();
+
+    assert.match(await text(".error-box"), /Catalog unavailable/);
+    assert.match(await text(".x-personas-list"), /Could not read the catalog/);
+    assert.doesNotMatch(await text(".x-personas-list"), /Reading personas/);
+
+    // The next load succeeds: reload the tab, then open the manager again.
+    await page.navigate(`${base}/s/${String(session)}`);
+    await until(() => has('.sidebar .rail-ext[title="Personas"]'), "the Personas rail button");
+    await page.click({ selector: '.sidebar .rail-ext[title="Personas"]' });
+    await until(() => has(".x-personas"), "the personas page again");
+    await settled();
+
+    // A slow save keeps the editor locked until the answer.
+    await page.click({ label: "New persona" });
+    await page.type({ selector: ".x-personas-input" }, "Slow save");
+    await page.type({ selector: ".x-personas-text" }, "Wait for me.");
+    await page.evaluate(`(() => {
+        const original = window.fetch;
+        window.__personasFetch = original;
+        window.fetch = (url, options) =>
+            String(url).includes("/api/x/personas/personas") && options?.method === "POST"
+                ? new Promise((resolve) => setTimeout(() => resolve(original(url, options)), 1500))
+                : original(url, options);
+        return JSON.stringify(null);
+    })()`);
+    await page.click({ label: "Save" });
+    await until(async () => {
+        const locked = await inPage<{ rows: boolean; input: boolean; text: boolean }>(
+            `return JSON.stringify({
+                rows: [...document.querySelectorAll(".x-personas-row")].every((each) => each.disabled),
+                input: document.querySelector(".x-personas-input")?.disabled ?? false,
+                text: document.querySelector(".x-personas-text")?.disabled ?? false,
+            })`,
+        );
+
+        return locked.rows && locked.input && locked.text;
+    }, "the editor to be disabled while saving");
+    await page.waitFor({ text: "Saved" });
+    await until(async () => {
+        const unlocked = await inPage<boolean>(
+            `return JSON.stringify(
+                !document.querySelector(".x-personas-input")?.disabled &&
+                !document.querySelector(".x-personas-text")?.disabled &&
+                [...document.querySelectorAll(".x-personas-row")].every((each) => !each.disabled)
+            )`,
+        );
+
+        return unlocked;
+    }, "the editor to be enabled again");
+
+    await page.evaluate(
+        `(() => { window.fetch = window.__personasFetch; return JSON.stringify(null); })()`,
+    );
 });

@@ -17,21 +17,8 @@ cp -r personas ~/.pi-pocket/extensions/
 Then turn it on in **Menu → Extensions → Pi Pocket Personas**. A drop-in starts off. The browser module loads in the
 tab at its next reload.
 
-The default for new sessions needs Pi Pocket 0.20.0 or newer (the session list); this version was tested on 0.22.0.
-
-### Upgrading from the earlier names
-
-The module was briefly `pi-pocket-personas.ts` with the browser folder `personas-ui/`. Remove those, then install as
-above:
-
-```sh
-rm -rf ~/.pi-pocket/extensions/pi-pocket-personas.ts ~/.pi-pocket/extensions/personas-ui
-```
-
-The document kinds are unchanged (`x.personas.catalog`, `x.personas.active`), so saved personas, the default, and each
-session's choice are still there. The extension's internal name is now `personas`; a conversation that explicitly
-selected `my-personas` or `pi-pocket-personas` may need it selected again. Pi Pocket's default is every installed
-extension, so most sessions need nothing.
+This extension needs Pi Pocket 0.20.0 or newer (the session list, which the picker and the default use); this version
+was tested on 0.22.0.
 
 ## Files
 
@@ -40,9 +27,10 @@ personas.ts                    the module: the prompt section, the routes, and /
 personas/
     index.js                   the page, the picker sheet, the rail button, and the status item
     style.css                  the page's and picker's look
-pi-pocket-personas.test.ts     routes, the section, the command, a restart, the default, migration, off/on
-pi-pocket-personas-ui.test.ts  the same flow in a real Chromium, desktop and phone
+pi-pocket-personas.test.ts     routes, the section, the command, a restart, the default, validation, migration, off/on
+pi-pocket-personas-ui.test.ts  the same flow in a real Chromium, desktop and phone, a failed catalog, and a locked save
 _pocket.d.ts                   a copy of Pi Pocket 0.22.0's public types, for `npm run check`
+CHANGELOG.md                   the release notes
 ```
 
 `personas.ts` and `personas/` are what go into `extensions/`; `_pocket.d.ts` is only for the repo's type check. The
@@ -127,8 +115,26 @@ web.route("PUT", "active/:session", handler, { access: "steer" });
 ```
 
 and change the command's `scope` to `"conversation"`. Keep the catalog routes (`GET catalog`, `POST personas`,
-`DELETE personas/:id`) owner-only: guests can choose a persona, but not edit or delete one. The manager page fetches
-the catalog, so a guest sees its error; use the picker alone for guests.
+`DELETE personas/:id`) owner-only: guests can choose a persona, but not edit or delete one.
+
+The manager page, its rail button, menu row, and launcher action are still added for guests, and the manager shows the
+catalog's error. To keep the manager to the owner, register those four only for the owner, and leave the picker, the
+status item, and the message-box button for everyone:
+
+```js
+if (pocket.me()?.role === "owner") {
+    pocket.page({ id: "manage", title: "Personas", component: Manager });
+    pocket.rail({ id: "manage", title: "Personas", iconPath: MASK, page: "manage" });
+    pocket.menu({ id: "manage", label: "Personas", hint: "system prompt", page: "manage" });
+    pocket.launcher({
+        id: "manage",
+        label: "Personas",
+        detail: "choose, edit, save",
+        iconPath: MASK,
+        page: "manage",
+    });
+}
+```
 
 ## Test
 

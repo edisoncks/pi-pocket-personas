@@ -233,6 +233,39 @@ test("a default applies to later sessions, and a change pins what sessions use n
     assert.match((await sectionsNow(fresh)).persona ?? "", /PERSONA-SENTINEL/);
 });
 
+test("a persona id must be addressable, and a persona can be updated and deleted", async () => {
+    // An id that the app resolves as a path part, or that starts with punctuation, cannot be used.
+    for (const id of ["..", ".", "_hidden", "-hidden", ":hidden", "x".repeat(65)]) {
+        const refused = await call("/api/x/personas/personas", {
+            method: "POST",
+            body: { id, name: "Bad id", content: "x" },
+        });
+
+        assert.equal(refused.status, 400, `id ${JSON.stringify(id)}`);
+    }
+
+    const id = "Reviewer_1.2-beta";
+    const created = await call("/api/x/personas/personas", {
+        method: "POST",
+        body: { id, name: "Reviewer", content: "One." },
+    });
+
+    assert.equal(created.status, 200);
+    assert.equal((created.data as { persona: { id: string } }).persona.id, id);
+
+    const updated = await call("/api/x/personas/personas", {
+        method: "POST",
+        body: { id, name: "Reviewer 2", content: "Two." },
+    });
+
+    assert.equal(updated.status, 200);
+    assert.equal((updated.data as { persona: { name: string } }).persona.name, "Reviewer 2");
+
+    const deleted = await call(`/api/x/personas/personas/${id}`, { method: "DELETE" });
+
+    assert.equal(deleted.status, 200);
+});
+
 test("the command selects and clears, and the choice survives a restart", async () => {
     const id = await newSession(app);
     const catalog = await call("/api/x/personas/catalog");

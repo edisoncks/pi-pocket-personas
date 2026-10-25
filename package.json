@@ -1,6 +1,6 @@
 {
     "name": "pi-pocket-personas",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "description": "Saved personas for Pi Pocket: a system-prompt section per session, a manager page, a picker, and a default for new sessions.",
     "type": "module",

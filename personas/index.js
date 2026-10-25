@@ -1,7 +1,7 @@
 /**
  * The personas browser module: a page to edit saved personas, a sheet to choose one for the session, a button in the
- * message box, and an item in the status line. It talks only to `pi-pocket-personas.ts` routes; the persona text never lives in
- * this folder, which the app serves to the owner's tabs.
+ * message box, and an item in the status line. It talks only to `personas.ts` routes; the persona text never lives in this
+ * folder, which the app serves to the owner's tabs.
  */
 
 /** The version of `pocket` this module was written for. */
@@ -280,6 +280,7 @@ export default function setup(pocket) {
         const [note, setNote] = useState(null);
         const [busy, setBusy] = useState(false);
         const [confirmId, setConfirmId] = useState(null);
+        const [loadFailed, setLoadFailed] = useState(false);
         const editor = useRef(null);
 
         const load = async (signal) => {
@@ -293,9 +294,11 @@ export default function setup(pocket) {
                 setPersonas(data.personas);
                 setDefaultId(data.defaultPersonaId ?? null);
                 setError(null);
+                setLoadFailed(false);
             } catch (failure) {
                 if (!signal?.aborted) {
                     setError(errorText(failure));
+                    setLoadFailed(true);
                 }
             }
         };
@@ -444,7 +447,14 @@ export default function setup(pocket) {
                         provider with the rest of the system prompt; keep secrets out.
                     </p>
                 </div>
-                <button type="button" class="button primary" onClick=${create}>New persona</button>
+                <button
+                    type="button"
+                    class="button primary"
+                    disabled=${busy}
+                    onClick=${create}
+                >
+                    New persona
+                </button>
             </div>
             ${error !== null ? html`<div class="error-box">${error}</div>` : null}
             ${note !== null ? html`<p class="small x-personas-note">${note}</p>` : null}
@@ -474,7 +484,11 @@ export default function setup(pocket) {
                 <nav class="x-personas-list" aria-label="Saved personas">
                     ${
                         personas === null
-                            ? html`<${pocket.Loader} label="Reading personas" />`
+                            ? loadFailed
+                                ? html`<p class="muted small">
+                                      Could not read the catalog.
+                                  </p>`
+                                : html`<${pocket.Loader} label="Reading personas" />`
                             : personas.length === 0
                               ? html`<p class="muted small">
                                     No personas yet. Make the first one.
@@ -484,6 +498,7 @@ export default function setup(pocket) {
                                         html`<button
                                             key=${persona.id}
                                             type="button"
+                                            disabled=${busy}
                                             class=${
                                                 "x-personas-row" +
                                                 (draft?.id === persona.id ? " current" : "")
@@ -509,6 +524,7 @@ export default function setup(pocket) {
                                           class="x-personas-input"
                                           value=${draft.name}
                                           maxlength=${80}
+                                          disabled=${busy}
                                           placeholder="e.g. Terse reviewer"
                                           onInput=${(event) =>
                                               setDraft({
@@ -522,6 +538,7 @@ export default function setup(pocket) {
                                       <textarea
                                           class="x-personas-text"
                                           rows=${14}
+                                          disabled=${busy}
                                           value=${draft.content}
                                           placeholder="How Pi should speak and behave in this session…"
                                           onInput=${(event) =>
@@ -536,8 +553,8 @@ export default function setup(pocket) {
                                       ${VARIABLES.map(([name]) => `{{${name}}}`).join(" · ")}
                                   </p>
                                   <p class="muted small x-personas-vars">
-                                      Unknown names stay as typed; write <code>{{</code> for a
-                                      literal brace.
+                                      Unknown names stay as typed; write <code>\\{{</code> for
+                                      literal braces.
                                   </p>
                                   ${
                                       unknown.length > 0

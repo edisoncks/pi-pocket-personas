@@ -15,7 +15,7 @@ import type { Host, Web } from "./_pocket.d.ts";
 /** The version of Pi Pocket's extension API this module is written for. */
 export const pocketApi = 1;
 
-/** One saved persona. `id` never changes; `updatedAt` is for the list's order. */
+/** One saved persona. `id` never changes; `updatedAt` is the time of the last save. */
 type Persona = {
     id: string;
     name: string;
@@ -281,7 +281,9 @@ export default function createPersonas(host: Host, web: Web) {
     web.route("POST", "personas", async ({ body, commit }) => {
         const id = typeof body.id === "string" && body.id !== "" ? body.id : undefined;
 
-        if (id !== undefined && !/^[A-Za-z0-9._:-]{1,64}$/.test(id)) {
+        // A letter or digit first, then the safe characters: the app resolves `.` and `..` as path parts,
+        // so an id like that could be saved but never deleted.
+        if (id !== undefined && !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/.test(id)) {
             throw web.error(400, "That persona id is not valid.");
         }
 
