@@ -167,4 +167,4 @@ The UI test needs a Chromium that Pi Pocket can find. `npm run check` checks the
 
 ## License
 
-No license yet. Add one before you share the repo or publish it to the gallery.
+MIT. See [LICENSE](LICENSE).
