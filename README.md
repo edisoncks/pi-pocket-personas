@@ -1,5 +1,7 @@
 # Pi Pocket Personas
 
+An extension for [Pi Pocket](https://github.com/TannerMidd/pi-pocket), the durable, multiplayer coding agent app.
+
 Saved system-prompt fragments that the owner chooses for one session. The chosen persona is appended to Pi's system
 prompt for that session, from the next model request on. Each session can have a persona, or none.
 
