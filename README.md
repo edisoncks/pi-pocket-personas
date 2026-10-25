@@ -5,50 +5,78 @@ prompt for that session, from the next model request on. Each session can have a
 
 ## Install
 
+### From the gallery in this repository
+
+This repository is also its own gallery index (`index.json`). In Pi Pocket:
+
+1. **Menu → Extensions → Discover**.
+2. At the bottom, set the index to `edisoncks/pi-pocket-personas`.
+3. Install **Pi Pocket Personas**.
+
+The gallery downloads the files from this repository at the pinned commit, checks every SHA-256, and installs the
+module **off**. Read its source, then turn it on in **Menu → Extensions**. The browser module loads at the tab's next
+reload.
+
+The gallery keeps the installed copy and its provenance in `personas.gallery.json`; updates and uninstall go through
+the gallery.
+
+### With `cp` for development
+
 Copy the module and its browser folder into Pi Pocket's drop-in folder:
 
 ```sh
-cp pi-pocket-personas.ts ~/.pi-pocket/extensions/
-cp -r personas-ui ~/.pi-pocket/extensions/
+cp personas.ts ~/.pi-pocket/extensions/
+cp -r personas ~/.pi-pocket/extensions/
 ```
 
-Then turn it on in **Menu → Extensions → Pi Pocket Personas**. A drop-in starts off. The browser module loads in the
-tab at its next reload.
+Then turn it on in **Menu → Extensions → Pi Pocket Personas**.
+
+### In the main gallery
+
+The entry can also be submitted to the default gallery index, so anyone can install it without changing the index:
+open a pull request with `entries/personas.json` to
+[TannerMidd/pi-pocket-extensions](https://github.com/TannerMidd/pi-pocket-extensions). Its CONTRIBUTING tells the
+rest. **Share…** in Pi Pocket's Installed tab writes the entry draft from the installed module.
 
 The default for new sessions needs Pi Pocket 0.20.0 or newer (the session list); this version was tested on 0.22.0.
 
-### Upgrading from `personas.ts`
+### Upgrading from the earlier names
 
-The first version was the single file `personas.ts` with the folder `personas/`. Remove both, then install as above:
+The module was briefly `pi-pocket-personas.ts` with the browser folder `personas-ui/`. Remove those, then install as
+above:
 
 ```sh
-rm -rf ~/.pi-pocket/extensions/personas.ts ~/.pi-pocket/extensions/personas
+rm -rf ~/.pi-pocket/extensions/pi-pocket-personas.ts ~/.pi-pocket/extensions/personas-ui
 ```
 
 The document kinds are unchanged (`x.personas.catalog`, `x.personas.active`), so saved personas, the default, and each
-session's choice are still there. The extension's internal name changed to `pi-pocket-personas`; a conversation that
-explicitly selected the old `my-personas` extension may need it selected again. Pi Pocket's default is every installed
+session's choice are still there. The extension's internal name is now `personas`; a conversation that explicitly
+selected `my-personas` or `pi-pocket-personas` may need it selected again. Pi Pocket's default is every installed
 extension, so most sessions need nothing.
 
 ## Files
 
 ```
-pi-pocket-personas.ts          the module: the prompt section, the routes, and /persona-use
-personas-ui/
+personas.ts                    the module: the prompt section, the routes, and /persona-use
+personas/
     index.js                   the page, the picker sheet, the rail button, and the status item
     style.css                  the page's and picker's look
+index.json                     this repository as a gallery index
 pi-pocket-personas.test.ts     routes, the section, the command, a restart, the default, migration, off/on
-pi-pocket-personas-ui.test.ts  the same flow in a real Chromium
+pi-pocket-personas-ui.test.ts  the same flow in a real Chromium, desktop and phone
 _pocket.d.ts                   a copy of Pi Pocket 0.22.0's public types, for `npm run check`
 ```
 
-This file is the module that goes into `extensions/`; `_pocket.d.ts` is only for the repo's type check. The drop-in
-folder already has its own `_pocket.d.ts` symlink.
+`personas.ts` and `personas/` are what go into `extensions/`; `_pocket.d.ts` is only for the repo's type check. The
+drop-in folder already has its own `_pocket.d.ts` symlink.
 
 ## Use
 
-- **Message box → Persona** opens the picker. The first row is **No persona**.
-- **Status line** shows `persona: <name>`, or `no persona` muted, after the costs; a tap opens the picker.
+- **Message box → Persona** (wide screens), the **status item**, or **Menu → Choose persona** (in a session) opens the
+  picker. The first row is **No persona**. On a phone the composer button is left out to keep the message box in the
+  screen; the status item and the session menu remain.
+- **Status line** shows `persona: <name>`, or `no persona` muted, after the costs; a tap opens the picker. On a narrow
+  line its short form is `P` or `—`.
 - **Rail → Personas**, **Menu → Personas**, or `Ctrl/⌘+K → Personas` opens the manager. The rail uses a theatre-mask
   icon, distinct from the app's people and invites icons.
 - `/persona-use Terse reviewer` chooses one; `/persona-use off` clears it; `/persona-use` lists the names.
@@ -115,7 +143,7 @@ button, the picker, or the status item.
 To let guests who can steer a session choose a persona, widen all three:
 
 ```ts
-web.client("personas-ui", { access: "view" }); // or "steer"
+web.client("personas", { access: "view" }); // or "steer"
 web.route("GET", "state/:session", handler, { access: "view" });
 web.route("PUT", "active/:session", handler, { access: "steer" });
 ```

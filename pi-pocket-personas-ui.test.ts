@@ -96,16 +96,13 @@ before(async () => {
     }
 
     mkdirSync(dropIns, { recursive: true });
-    copyFileSync(
-        join(import.meta.dirname, "pi-pocket-personas.ts"),
-        join(dropIns, "pi-pocket-personas.ts"),
-    );
-    cpSync(join(import.meta.dirname, "personas-ui"), join(dropIns, "personas-ui"), {
+    copyFileSync(join(import.meta.dirname, "personas.ts"), join(dropIns, "personas.ts"));
+    cpSync(join(import.meta.dirname, "personas"), join(dropIns, "personas"), {
         recursive: true,
     });
 
     app = await openApp(scriptedModel(), dataDir);
-    await app.setExtensionEnabled(owner(app), "pi-pocket-personas.ts", true);
+    await app.setExtensionEnabled(owner(app), "personas.ts", true);
     session = await newSession(app);
 
     server = createServer(
@@ -225,3 +222,45 @@ test(
         assert.equal((await sectionsNow(session)).persona, undefined);
     },
 );
+
+test("the manager and message box fit a phone", real, async () => {
+    await page.setViewport({ width: 390, height: 844, scale: 1, mobile: true });
+    await page.navigate(`${base}/s/${String(session)}`);
+    await until(() => has('[data-part="status-item"]'), "the status item");
+    await until(
+        async () => !(await has('[aria-label="Persona"]')),
+        "no Persona button in the message box",
+    );
+    assert.equal(await text('[data-part="status-item"] .short'), "—");
+
+    // The launcher opens the manager page.
+    await page.press("Control+k");
+    await until(() => has(".launcher-input input"), "the launcher");
+    await page.type({ selector: ".launcher-input input" }, "Personas");
+    await until(
+        () => has('[data-part="launcher-row"][title^="Personas"]'),
+        "the Personas launcher action",
+    );
+    await page.click({ selector: '[data-part="launcher-row"][title^="Personas"]' });
+    await until(() => has(".x-personas"), "the personas page");
+    await settled();
+
+    const button = JSON.parse(
+        await page.evaluate(
+            `return JSON.stringify(document.querySelector(".x-personas-head .button").getBoundingClientRect())`,
+        ),
+    ) as { width: number; height: number };
+
+    assert.ok(button.height < 60, `the New persona button is too tall: ${button.height}`);
+    assert.ok(button.width < 200, `the New persona button is too wide: ${button.width}`);
+
+    const box = JSON.parse(
+        await page.evaluate(
+            `return JSON.stringify({ scroll: document.querySelector(".x-personas").scrollWidth, client: document.querySelector(".x-personas").clientWidth })`,
+        ),
+    ) as { scroll: number; client: number };
+
+    assert.ok(box.scroll <= box.client + 1, `the page overflows: ${JSON.stringify(box)}`);
+
+    await page.setViewport(DESKTOP);
+});

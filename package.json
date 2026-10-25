@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "test": "node --test pi-pocket-personas.test.ts pi-pocket-personas-ui.test.ts",
-        "check": "tsc --noEmit --target ES2024 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --allowImportingTsExtensions --erasableSyntaxOnly --verbatimModuleSyntax --types node pi-pocket-personas.ts"
+        "check": "tsc --noEmit --target ES2024 --module NodeNext --moduleResolution NodeNext --strict --skipLibCheck --allowImportingTsExtensions --erasableSyntaxOnly --verbatimModuleSyntax --types node personas.ts"
     },
     "devDependencies": {
         "@earendil-works/chord": "1.4.0",

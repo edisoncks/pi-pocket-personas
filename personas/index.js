@@ -106,13 +106,13 @@ export default function setup(pocket) {
                 persona
                     ? {
                           text: `persona: ${persona.name}`,
-                          short: persona.name,
+                          short: "P",
                           title: `Persona: ${persona.name} — tap to change`,
                           tone: undefined,
                       }
                     : {
                           text: "no persona",
-                          short: "none",
+                          short: "—",
                           title: "No persona in this session — tap to choose one",
                           tone: "muted",
                       },
@@ -612,6 +612,13 @@ export default function setup(pocket) {
 
     pocket.page({ id: "manage", title: "Personas", component: Manager });
     pocket.sheet({ id: "pick", title: "Choose a persona", component: Picker });
+    pocket.menu({
+        id: "pick",
+        label: "Choose persona",
+        hint: "this session",
+        group: "session",
+        sheet: "pick",
+    });
     pocket.rail({ id: "manage", title: "Personas", iconPath: MASK, page: "manage" });
     pocket.menu({
         id: "manage",
@@ -626,18 +633,38 @@ export default function setup(pocket) {
         iconPath: MASK,
         page: "manage",
     });
-    pocket.composerButton({
-        id: "pick",
-        title: "Persona",
-        iconPath: MASK,
-        sheet: "pick",
-    });
+    // The message box has less room on a phone: the status item and the session menu open the picker there, and the
+    // composer button appears only where it fits.
+    let composer = null;
+    const wide = window.matchMedia("(min-width: 700px)");
+
+    function syncComposer() {
+        if (wide.matches) {
+            if (composer === null && typeof pocket.composerButton === "function") {
+                composer = pocket.composerButton({
+                    id: "pick",
+                    title: "Persona",
+                    iconPath: MASK,
+                    sheet: "pick",
+                });
+            }
+        } else if (composer !== null) {
+            composer.remove();
+            composer = null;
+        }
+    }
+
+    syncComposer();
+    wide.addEventListener("change", syncComposer);
 
     if (typeof pocket.style === "function") {
         pocket.style("style.css");
     }
 
     return () => {
+        wide.removeEventListener("change", syncComposer);
+        composer?.remove();
+
         for (const stop of stops) {
             stop();
         }

@@ -21,7 +21,7 @@ import { defineDoc } from "@earendil-works/pi-durable";
 
 const dataDir = join(root, "personas-data");
 const dropIns = join(dataDir, "extensions");
-const moduleFile = "pi-pocket-personas.ts";
+const moduleFile = "personas.ts";
 
 // The module's documents, for the tests that write them directly. Same kind, scope, and version.
 const Catalog = defineDoc({
@@ -114,8 +114,8 @@ async function call(path: string, options: { method?: string; body?: unknown } =
 
 before(async () => {
     mkdirSync(dropIns, { recursive: true });
-    copyFileSync(join(import.meta.dirname, "pi-pocket-personas.ts"), join(dropIns, moduleFile));
-    cpSync(join(import.meta.dirname, "personas-ui"), join(dropIns, "personas-ui"), {
+    copyFileSync(join(import.meta.dirname, "personas.ts"), join(dropIns, moduleFile));
+    cpSync(join(import.meta.dirname, "personas"), join(dropIns, "personas"), {
         recursive: true,
     });
 
@@ -138,7 +138,7 @@ after(async () => {
 
 test("a persona is saved, chosen for one session, and injected into its prompt", async () => {
     const id = await newSession(app);
-    const created = await call("/api/x/pi-pocket-personas/personas", {
+    const created = await call("/api/x/personas/personas", {
         method: "POST",
         body: { name: "Terse reviewer", content: "PERSONA-SENTINEL Answer in one sentence." },
     });
@@ -148,14 +148,14 @@ test("a persona is saved, chosen for one session, and injected into its prompt",
 
     assert.equal(persona.name, "Terse reviewer");
 
-    const chosen = await call(`/api/x/pi-pocket-personas/active/${String(id)}`, {
+    const chosen = await call(`/api/x/personas/active/${String(id)}`, {
         method: "PUT",
         body: { personaId: persona.id },
     });
 
     assert.deepEqual(chosen.data, { activeId: persona.id });
 
-    const state = await call(`/api/x/pi-pocket-personas/state/${String(id)}`);
+    const state = await call(`/api/x/personas/state/${String(id)}`);
 
     assert.deepEqual(state.data, {
         personas: [{ id: persona.id, name: "Terse reviewer" }],
@@ -172,7 +172,7 @@ test("a persona is saved, chosen for one session, and injected into its prompt",
 
     // Another session has no persona.
     const other = await newSession(app);
-    const otherState = await call(`/api/x/pi-pocket-personas/state/${String(other)}`);
+    const otherState = await call(`/api/x/personas/state/${String(other)}`);
 
     const otherData = otherState.data as {
         activeId: string | null;
@@ -190,12 +190,12 @@ test("a persona is saved, chosen for one session, and injected into its prompt",
 });
 
 test("a default applies to later sessions, and a change pins what sessions use now", async () => {
-    const catalog = await call("/api/x/pi-pocket-personas/catalog");
+    const catalog = await call("/api/x/personas/catalog");
     const persona = (catalog.data as { personas: { id: string; name: string }[] }).personas.find(
         (each) => each.name === "Terse reviewer",
     )!;
     const old = await newSession(app);
-    const set = await call("/api/x/pi-pocket-personas/default", {
+    const set = await call("/api/x/personas/default", {
         method: "POST",
         body: { personaId: persona.id },
     });
@@ -214,7 +214,7 @@ test("a default applies to later sessions, and a change pins what sessions use n
 
     // A session can still choose none while the default names a persona.
     const neither = await newSession(app);
-    await call(`/api/x/pi-pocket-personas/active/${String(neither)}`, {
+    await call(`/api/x/personas/active/${String(neither)}`, {
         method: "PUT",
         body: { personaId: null },
     });
@@ -222,7 +222,7 @@ test("a default applies to later sessions, and a change pins what sessions use n
     assert.equal((await sectionsNow(neither)).persona, undefined);
 
     // Changing the default pins sessions without a choice to what they use now; later sessions get the new one.
-    await call("/api/x/pi-pocket-personas/default", {
+    await call("/api/x/personas/default", {
         method: "POST",
         body: { personaId: null },
     });
@@ -235,7 +235,7 @@ test("a default applies to later sessions, and a change pins what sessions use n
 
 test("the command selects and clears, and the choice survives a restart", async () => {
     const id = await newSession(app);
-    const catalog = await call("/api/x/pi-pocket-personas/catalog");
+    const catalog = await call("/api/x/personas/catalog");
     const persona = (catalog.data as { personas: { id: string; name: string }[] }).personas[0]!;
     const commandId = app.webs.commands().find((each) => each.name === "persona-use")?.id;
 
@@ -322,18 +322,15 @@ test("a version 1 catalog migrates, and its sessions keep their persona", async 
     const migrationDrop = join(migrationDir, "extensions");
 
     mkdirSync(migrationDrop, { recursive: true });
-    copyFileSync(
-        join(import.meta.dirname, "pi-pocket-personas.ts"),
-        join(migrationDrop, "pi-pocket-personas.ts"),
-    );
-    cpSync(join(import.meta.dirname, "personas-ui"), join(migrationDrop, "personas-ui"), {
+    copyFileSync(join(import.meta.dirname, "personas.ts"), join(migrationDrop, "personas.ts"));
+    cpSync(join(import.meta.dirname, "personas"), join(migrationDrop, "personas"), {
         recursive: true,
     });
 
     const migrationApp = await openApp(scriptedModel(), migrationDir);
 
     try {
-        await migrationApp.setExtensionEnabled(owner(migrationApp), "pi-pocket-personas.ts", true);
+        await migrationApp.setExtensionEnabled(owner(migrationApp), "personas.ts", true);
         const id = await newSession(migrationApp);
         const persona = {
             id: crypto.randomUUID(),

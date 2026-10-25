@@ -4,7 +4,7 @@
  *
  * Data lives in two Pi Durable documents in pocket.sqlite: the catalog (`x.personas.catalog`, app-wide) and the choice
  * for each session (`x.personas.active`, by conversation). The kinds keep their first names so that personas saved by
- * the earlier `personas.ts` module are still there. The browser module is `personas-ui/index.js`.
+ * the earlier `personas.ts` module are still there. The browser module is `personas/index.js`.
  */
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
@@ -431,7 +431,7 @@ export default function createPersonas(host: Host, web: Web) {
     });
 
     // The page, picker, and buttons live in the folder beside this file.
-    web.client("personas-ui");
+    web.client("personas");
 
-    return defineExtension({ name: "pi-pocket-personas", sections: [personaSection] });
+    return defineExtension({ name: "personas", sections: [personaSection] });
 }

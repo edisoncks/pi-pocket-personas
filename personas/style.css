@@ -179,7 +179,20 @@
     }
 
     .x-personas-head {
+        flex-direction: column;
         align-items: stretch;
+        gap: 10px;
+    }
+
+    .x-personas-head .button {
+        align-self: flex-start;
+        height: auto;
+        white-space: nowrap;
+    }
+
+    /* The page header already says Personas; the body does not need it again on a phone. */
+    .x-personas-title {
+        display: none;
     }
 
     .x-personas-grid {
