@@ -4,6 +4,7 @@ import {
     cleanUp,
     context,
     newSession,
+    lastText,
     openApp,
     owner,
     root,
@@ -13,6 +14,7 @@ import {
     type App,
 } from "../pi-pocket/test/helpers.ts";
 import assert from "node:assert/strict";
+import { fauxAssistantMessage, fauxText } from "@earendil-works/pi-ai/providers/faux";
 import { cpSync, copyFileSync, mkdirSync, mkdtempSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { join } from "node:path";
@@ -21,6 +23,23 @@ import { Browsers } from "../pi-pocket/src/server/browser.ts";
 import { findBrowser } from "../pi-pocket/src/server/browser/discovery.ts";
 import type { BrowserPage } from "../pi-pocket/src/server/browser/page.ts";
 import { createHandler } from "../pi-pocket/src/server/http.ts";
+
+const model = scriptedModel((context) => {
+    const { text } = lastText(context as never);
+
+    if (text.includes("SLOW")) {
+        return new Promise((resolve) => {
+            const timer = setTimeout(
+                () => resolve(fauxAssistantMessage([fauxText("done")])),
+                30_000,
+            );
+
+            timer.unref();
+        });
+    }
+
+    return fauxAssistantMessage([fauxText(`echo: ${text}`)]);
+});
 
 const chromium = findBrowser();
 const real = {
@@ -101,7 +120,7 @@ before(async () => {
         recursive: true,
     });
 
-    app = await openApp(scriptedModel(), dataDir);
+    app = await openApp(model, dataDir);
     await app.setExtensionEnabled(owner(app), "personas.ts", true);
     session = await newSession(app);
 
@@ -232,6 +251,35 @@ test("the manager and message box fit a phone", real, async () => {
         "no Persona button in the message box",
     );
     assert.equal(await text('[data-part="status-item"] .short'), "—");
+
+    // While Pi works, Steer, Queue, and Interrupt join the row. It must still fit.
+    await app.commands.submit(session, owner(app), {
+        text: "SLOW",
+        requestId: crypto.randomUUID(),
+    });
+    await until(() => has(".composer.busy .mode-switch"), "the busy composer");
+    await settled();
+
+    const busy = JSON.parse(
+        await page.evaluate(`return JSON.stringify((() => {
+            const row = document.querySelector('[data-part="composer-tools"]');
+            const stop = document.querySelector(".stop-button");
+            return {
+                scroll: row.scrollWidth,
+                client: row.clientWidth,
+                stopRight: stop ? stop.getBoundingClientRect().right : null,
+                inner: window.innerWidth,
+            };
+        })())`),
+    ) as { scroll: number; client: number; stopRight: number | null; inner: number };
+
+    assert.ok(busy.scroll <= busy.client + 1, `the busy row overflows: ${JSON.stringify(busy)}`);
+    assert.ok(
+        busy.stopRight !== null && busy.stopRight <= busy.inner + 1,
+        `Stop is off screen: ${JSON.stringify(busy)}`,
+    );
+
+    await app.commands.abort(session, owner(app));
 
     // The launcher opens the manager page.
     await page.press("Control+k");
