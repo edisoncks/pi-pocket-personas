@@ -5,18 +5,6 @@ prompt for that session, from the next model request on. Each session can have a
 
 ## Install
 
-### From the main gallery
-
-The entry is prepared for the main gallery index, `TannerMidd/pi-pocket-extensions`, as `entries/personas.json`. After
-that pull request is merged, install **Pi Pocket Personas** from **Menu → Extensions → Discover**. The gallery downloads
-the files from this repository at the pinned commit, checks every SHA-256, and installs the module **off**. Read its
-source, then turn it on in **Menu → Extensions**. The browser module loads at the tab's next reload.
-
-The gallery keeps the installed copy and its provenance in `personas.gallery.json`; updates and uninstall go through
-the gallery.
-
-### Manual install for development
-
 Copy the module and its browser folder into Pi Pocket's drop-in folder:
 
 ```sh
@@ -24,7 +12,8 @@ cp personas.ts ~/.pi-pocket/extensions/
 cp -r personas ~/.pi-pocket/extensions/
 ```
 
-Then turn it on in **Menu → Extensions → Pi Pocket Personas**.
+Then turn it on in **Menu → Extensions → Pi Pocket Personas**. A drop-in starts off. The browser module loads in the
+tab at its next reload.
 
 The default for new sessions needs Pi Pocket 0.20.0 or newer (the session list); this version was tested on 0.22.0.
 
