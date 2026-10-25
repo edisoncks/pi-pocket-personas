@@ -16,10 +16,10 @@
                 "name": "Edison Chong",
                 "github": "edisoncks"
             },
-            "version": "0.1.0",
+            "version": "1.0.0",
             "source": {
                 "repo": "edisoncks/pi-pocket-personas",
-                "commit": "76e4099a46f7cd6ca37696e53931b48d8457d1b4",
+                "commit": "4fe9bd8b44b58f16018325ea377c47c1f11b8383",
                 "path": ""
             },
             "files": [
